@@ -18,7 +18,7 @@ public:
 	void addConstraint(Constraint* c, int index);
 	void Pin() { isPinned = true; };
 	void KeepInsideView(sf::Vector2f& pos, sf::Vector2f& old_pos);
-	void Update(float dt, float drag, sf::Vector2f& gravity, sf::Vector2f& lastMouseP, bool dragging, sf::Vector2f& mouseP, float elasticity);
+	void Update(float dt, float drag, sf::Vector2f& gravity, sf::Vector2f& lastMouseP, bool dragging, sf::Vector2f& mouseP, float elasticity, bool tearing, sf::Vector2f& tearMP);
 
 
 };

@@ -32,6 +32,7 @@ int main()
     float dt;
     sf::Vector2f lastMouseP{ 0,0 };
     sf::Vector2f mouseP {0,0};
+    sf::Vector2f tearMP{ 0,0 };
     bool dragging = false;
     bool tearing = false;
     window.setFramerateLimit(144);
@@ -51,38 +52,48 @@ int main()
                 // left click...
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 lastMouseP = { (float)mousePos.x,(float)mousePos.y };
-                dragging = true;
-               // mouseP = { lastMouseP.x,lastMouseP.y };
-                std::cout << "last "<<lastMouseP.x << ' ';
-            }
-       
-            if (event.type == sf::Event::MouseButtonReleased){
                 dragging = false;
+               // mouseP = { lastMouseP.x,lastMouseP.y };
+               //std::cout << "mlast "<<lastMouseP.x << ' ';
+            }
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
+            {
+                // right click...
+               // std::cout << "tearing " << '\n';
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                tearMP = { (float)mousePos.x,(float)mousePos.y };
+                tearing = true;
+            }
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left){
+                dragging = true;
                 sf::Vector2i mp = sf::Mouse::getPosition(window);
                 mouseP = { (float)mp.x, (float)mp.y };
-                std::cout << "curr "<<mouseP.x << '\n';
+                //std::cout << "mcurr "<<mouseP.x << '\n';
+
             }
         }
        
         window.clear();
-        //std::cout << lastMouseP.x << ' ' << mouseP.x << '\n';
+        //std::cout << "MAIN "<<lastMouseP.x << ' ' << mouseP.x << '\n';
         //sf::Vector2f mouseSpeed = mouseP - lastMouseP;
-        physics.update(dt,lastMouseP, dragging, mouseP);
+        physics.update(dt, lastMouseP, dragging, mouseP,tearing,tearMP);
         for (auto& p : physics.particles) {
            // p->isSelected = isInRadius(p->pos, mouseP, 20.0f);
             //p->Update(dt,physics.drag,physics.gravity,dragging,physics.elasticity,mouseSpeed);
-            sf::CircleShape tmp(2.0f);
+            sf::CircleShape tmp(0.0f);
             tmp.setPosition(p->pos);
             window.draw(tmp);
         }
         for (auto& c: physics.constraints) {
            // c->Update();
-            sf::Vertex line[] =
-            {
-                sf::Vector2f{c->p1.pos.x+2,c->p1.pos.y+2},
-                sf::Vector2f{c->p2.pos.x + 2,c->p2.pos.y + 2}
-            };
-            window.draw(line, 2, sf::Lines);
+            if (c->isActive) {
+                sf::Vertex line[] =
+                {
+                    sf::Vector2f{c->p1.pos.x + 2,c->p1.pos.y + 2},
+                    sf::Vector2f{c->p2.pos.x + 2,c->p2.pos.y + 2}
+                };
+                window.draw(line, 2, sf::Lines);
+            }
         }
         window.display();
     }

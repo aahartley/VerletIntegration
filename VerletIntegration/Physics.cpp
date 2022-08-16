@@ -33,7 +33,9 @@ Physics::Physics(float width, float height, float spacing, float startX, float s
 	}
 }
 
-void Physics::update(float dt, sf::Vector2f& lastMouseP, bool dragging, sf::Vector2f& mouseP) {
+void Physics::update(float dt, sf::Vector2f& lastMouseP, bool& dragging, sf::Vector2f& mouseP, bool& tearing, sf::Vector2f& tearMP) {
+	//std::cout << "UPDATE " << lastMouseP.x << ' ' << mouseP.x << '\n';
+
 	for (auto& p : particles) {
 	/*	float prevx = p->pos.x;
 		float prevy = p->pos.y;
@@ -43,20 +45,25 @@ void Physics::update(float dt, sf::Vector2f& lastMouseP, bool dragging, sf::Vect
 		p->old_pos.y = prevy;
 		keepInsideView(p->pos,p->old_pos);
 		std::cout << "y: " << p->pos.y << '\n';*/
-		p->Update(dt, drag, gravity, lastMouseP, dragging, mouseP,elasticity);
+		p->Update(dt, drag, gravity, lastMouseP, dragging, mouseP,elasticity,tearing, tearMP);
 		
 
 	}
 	for (auto& c : constraints)
 	{
-		sf::Vector2f diff = getDifference(c->p1, c->p2);
-		float diffFactor = (c->length - getLength(diff)) / getLength(diff) * 0.5;
-		sf::Vector2f offset = { diff.x * diffFactor,  diff.y * diffFactor };
+		if (c->isActive) {
+			sf::Vector2f diff = getDifference(c->p1, c->p2);
+			float diffFactor = (c->length - getLength(diff)) / getLength(diff) * 0.5;
+			sf::Vector2f offset = { diff.x * diffFactor,  diff.y * diffFactor };
 
-		c->p1.pos.x += offset.x;
-		c->p1.pos.y += offset.y;
-		c->p2.pos.x -= offset.x;
-		c->p2.pos.y -= offset.y;
+			c->p1.pos.x += offset.x;
+			c->p1.pos.y += offset.y;
+			c->p2.pos.x -= offset.x;
+			c->p2.pos.y -= offset.y;
+		}
 	}
+	dragging = false;
+	tearing = false;
+
 }
 
